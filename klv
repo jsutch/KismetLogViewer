@@ -108,7 +108,7 @@ summaryFilename = args.n
 if args.log_file_path[-1:] <> "/":
    args.log_file_path = args.log_file_path + "/"
 
-#Remove empty files
+# remove empty files
 files_in_dir = os.listdir(args.log_file_path)
 
 indir=args.log_file_path
@@ -152,9 +152,7 @@ def main():
                network_gps_avg_lon = ""
                network_gps_avg_alt = ""
                network_oui = ""
-#Added by j0nk0
                network_client = ""
-#/Added by j0nk0
                for network_detail in network:
 
                   if network_detail.tag == 'SSID':
@@ -162,7 +160,6 @@ def main():
                         if child_network.tag == 'essid':
                            if child_network.attrib.get("cloaked") == "true":
                               cloaked = "cloaked"
-#from v2                      cloaked = " &lt;cloaked&gt;"
                            else:
                               cloaked = ""
                            if child_network.text is None:
@@ -172,10 +169,8 @@ def main():
 
                         if child_network.tag == 'encryption':
                            network_encryption += child_network.text + '\n'
-#from v2                   network_encryption += child_network.text + "<br />"
 
                   if network_detail.tag == 'BSSID':
-#from 	          elif network_detail.tag == 'BSSID':
                      network_bssid = network_detail.text
                      network_oui = network_bssid[0:2] + "-" + network_bssid[3:5] + "-" + network_bssid[6:8]
                      oui_file.seek(0)
@@ -184,7 +179,6 @@ def main():
                            network_manufacturer = line[18:]
                            break
 
-#Added by j0nk0
                   if network_detail.tag == 'wireless-client':
                      for child_network in network_detail:
                         if child_network.tag == 'client-mac':
@@ -193,7 +187,7 @@ def main():
 
                         if child_network.tag == 'client-mac':
                            network_client += child_network.text + "<br />"
-#/Added by j0nk0
+
   		  #Channel parsing
                   elif network_detail.tag == 'channel':
                      network_channel = network_detail.text
@@ -401,6 +395,7 @@ def create_html_file(network_matrix):
 
    summary_file.close()
 
-
+   print "Done, html-output saved as " + summaryFilename + '.html'
+   print "Done, csv-output saved as " + summaryFilename + '.csv'
 main()
 
