@@ -96,18 +96,22 @@ def main():
                         if child_network.tag == 'encryption':
                            network_encryption += child_network.text + "<br />"
    
-                  if network_detail.tag == 'BSSID':
+                  elif network_detail.tag == 'BSSID':
                      network_bssid = network_detail.text
                      network_oui = network_bssid[0:2] + "-" + network_bssid[3:5] + "-" + network_bssid[6:8]
                      oui_file.seek(0)
+                     #!@todo this is inefficient
                      for line in oui_file:
                         if network_oui in line:
-                           network_manufacturer = line[18:]
+                           network_manufacturer = line[20:]
                            break
+
+                  elif network_detail.tag == 'channel':
+                     network_channel = network_detail.text
    
                if network_bssid not in bssid_list:
                   bssid_list.append(network_bssid)
-                  network_matrix.append([network_essid, network_encryption, network_bssid, network_manufacturer])
+                  network_matrix.append([network_essid, network_channel, network_encryption, network_bssid, network_manufacturer])
    
    if output_format == 'html':
       create_html_file(network_matrix)
@@ -142,6 +146,7 @@ def create_html_file(network_matrix):
    summary_file.write('      <tr bgcolor="#cecece">\n')
    summary_file.write('        <th></th>\n')
    summary_file.write('        <th align=left><font size="1">Name (ESSID)</font></th>\n')
+   summary_file.write('        <th><font size="1">Channel</font></th>\n')
    summary_file.write('        <th><font size="1">Security</font></th>\n')
    summary_file.write('        <th><font size="1">BSSID</font></th>\n')
    summary_file.write('        <th><font size="1">Manufacturer</font></th>\n')
@@ -166,6 +171,7 @@ def create_html_file(network_matrix):
       summary_file.write('        <td align="center"><font size="1">' + network[1] + '</font></td>\n')
       summary_file.write('        <td align="center"><font size="1">' + network[2] + '</font></td>\n')
       summary_file.write('        <td align="center"><font size="1">' + network[3] + '</font></td>\n')
+      summary_file.write('        <td align="center"><font size="1">' + network[4] + '</font></td>\n')
       summary_file.write('        <td align="center"><font size="1">' + '</font></td>\n')
       summary_file.write('        <td align="center"><font size="1">' + '</font></td>\n')
       summary_file.write('      </tr>\n')
