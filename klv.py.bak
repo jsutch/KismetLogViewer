@@ -75,7 +75,7 @@ import xml.etree.ElementTree as ET
 import argparse
 
 #Vars
-oui_file = open('oui.txt') #http://standards-oui.ieee.org/oui.txt
+oui_file = open('oui.txt')
 network_matrix = []
 bssid_list = []
 log_file_list = []
@@ -116,12 +116,12 @@ def main():
 
          xml_tree = ET.parse(args.log_file_path + file_in_dir)
          xml_root = xml_tree.getroot()
-
+  
          # loop through each XML node of type "wireless-network"
          for network in xml_root.findall('wireless-network'):
-
+   
             network_type = network.get('type')
-
+   
             # ignoring probes right now
             if network_type <> 'probe':
                network_essid = ""
@@ -141,7 +141,7 @@ def main():
                network_client = ""
 #/Added by j0nk0
                for network_detail in network:
-
+   
                   if network_detail.tag == 'SSID':
                      for child_network in network_detail:
                         if child_network.tag == 'essid':
@@ -154,11 +154,11 @@ def main():
                               network_essid = "" + cloaked
                            else:
                               network_essid = child_network.text + cloaked
-
+   
                         if child_network.tag == 'encryption':
                            network_encryption += child_network.text + '\n'
 #from v2                   network_encryption += child_network.text + "<br />"
-
+   
                   if network_detail.tag == 'BSSID':
 #from 	          elif network_detail.tag == 'BSSID':
                      network_bssid = network_detail.text
@@ -166,6 +166,8 @@ def main():
                      oui_file.seek(0)
                      for line in oui_file:
                         if network_oui in line:
+#                          network_manufacturer = line[17:] #or change to 18 > probably a fix for choped output
+#                           network_manufacturer = line[20:]
                            network_manufacturer = line[18:]
                            break
 
@@ -175,14 +177,14 @@ def main():
                         if child_network.tag == 'client-mac':
                            if child_network.text is None:
                               network_client = child_network.text
-
+   
                         if child_network.tag == 'client-mac':
                            network_client += child_network.text + "<br />"
 #/Added by j0nk0
-  		  #Channel parsing
+  		  #Channel parsing             
                   elif network_detail.tag == 'channel':
                      network_channel = network_detail.text
-
+  
                   #Signal Info parsing
                   if network_detail.tag == 'snr-info':
                      for child_network in network_detail:
@@ -194,7 +196,7 @@ def main():
                           network_min_signal_rssi += child_network.text
                         if child_network.tag == 'max_signal_rssi':
                           network_max_signal_rssi += child_network.text
-
+   
                   #GPS Info parsing
                   if network_detail.tag == 'gps-info':
                      for child_network in network_detail:
@@ -204,13 +206,13 @@ def main():
                           network_gps_avg_lon += child_network.text
                         if child_network.tag == 'avg-alt':
                           network_gps_avg_alt += child_network.text
-
+               
                #bssid parsing
                if network_bssid not in bssid_list:
                   bssid_list.append(network_bssid)
 #Edited by j0nk0
                   network_matrix.append([network_essid, network_channel, network_encryption, network_bssid, network_manufacturer, network_client, network_min_signal_dbm, network_max_signal_dbm, network_min_signal_rssi, network_max_signal_rssi, network_gps_avg_lat, network_gps_avg_lon, network_gps_avg_alt])
-#/Edited by j0nk0
+#/Edited by j0nk0   
    if output_format == 'both':
      create_html_file(network_matrix)
      create_csv_file(network_matrix)
@@ -218,7 +220,7 @@ def main():
       create_html_file(network_matrix)
    elif output_format == 'csv':
       create_csv_file(network_matrix)
-
+   
 #output to CSV
 def create_csv_file(network_matrix):
    summary_file = open(summaryFilename + '.csv','w')
