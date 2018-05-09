@@ -17,6 +17,7 @@ build(){
 	install -m 755 -D $execname /usr/share/klv
 	install -m 755 -D README.md /usr/share/klv
 	install -m 644 -D oui.txt /usr/share/klv
+	rm /usr/bin/klv
 	ln -s /usr/share/klv/klv /usr/bin/klv
 }
  build

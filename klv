@@ -69,13 +69,15 @@ Todo:
 """
 
 import os
+import glob
 import sys
 import datetime
 import xml.etree.ElementTree as ET
 import argparse
-
 #Vars
-oui_file = open('oui.txt') #http://standards-oui.ieee.org/oui.txt
+__location__ = os.path.realpath(
+    os.path.join(os.getcwd(), os.path.dirname(__file__)))
+oui_file = open(os.path.join(__location__, 'oui.txt')) #http://standards-oui.ieee.org/oui.txt
 network_matrix = []
 bssid_list = []
 log_file_list = []
@@ -106,14 +108,27 @@ summaryFilename = args.n
 if args.log_file_path[-1:] <> "/":
    args.log_file_path = args.log_file_path + "/"
 
+#Remove empty files
+files_in_dir = os.listdir(args.log_file_path)
+
+indir=args.log_file_path
+os.chdir(indir)
+
+print "\n\nChecking for empty files:\n"
+for file_in_dir in files_in_dir:
+     if os.stat(file_in_dir).st_size==0:
+        print "Deleting empty file:"
+        print file_in_dir
+        os.remove(file_in_dir)
+
 def main():
    # cycle through each file in the directory
    files_in_dir = os.listdir(args.log_file_path)
+
    for file_in_dir in files_in_dir:
       if file_in_dir[-7:] == ".netxml":
          print "Adding file: ", file_in_dir
          log_file_list.append(file_in_dir)
-
          xml_tree = ET.parse(args.log_file_path + file_in_dir)
          xml_root = xml_tree.getroot()
 
