@@ -1,33 +1,49 @@
 #!/usr/bin/python
-############################################################################
-#                                                                          #
-#  Name: Kismet Log Viewer (KLV) v2 w/ extended features                   #
-#                                                                          #
-#  Description: KLV accepts one or more Kismet .netxml files, summarizes   #
-#               & de-duplicatesthe data, and creates a readable summary    #
-#               in either html or csv format.                              #
-#                                                                          #
-#  Usage: ./klv3.py -h                                                     #
-#         ./klv3.py /root/kismet-logs/                                     #
-#         ./klv3.py -t csv /root/kismet-logs/                              #
-#                                                                          #
-#  Requirements: Python                                                    #
-#                one or more Kismet .netxml log files                      #
-#                                                                          #
-#  Website: http://klv.professionallyevil.com                              #
-#  Author:  Nathan Sweaney - nathan@sweaney.com                            #
-#  Date:   July 9, 2013                                                    #
-#                                                                          #
-#  -- Extended features                                                    #
-#  Website: https://github.com/illegalPointer                              #
-#  Author: IllegalPointer                                                  #
-#  Date: Jun, 1, 2015                                                      #
-#       @NEW GPS,SignalInfo,HTML code on HTML creation (clean CSV)         #
-#            -n argument, Modify HTML, Clean \n on CSV, CSV headers        #
-#            -o default mode change                                        #
-#                                                                          #
-############################################################################
 """
+Kismet Log Viewer v3.1 Tool (http://klv.professionallyevil.com/)
+Combines multiple Kismet log files in the .netxml format, summarizes the data, and outputs an easy-to-read html or csv file.
+
+Kismet Log Viewer v2 Was written in Python, with limited functionality.
+The original KLV was written in 2003 by Brian Foy of Mindflip.org, but w/o support for newer versions of .netxml format.
+
+ ############################################################################
+ #  Name: Kismet Log Viewer (KLV) (w/ extended features)                                          #
+ #                                                                          #
+ #  Description: KLV accepts one or more Kismet .netxml files, summarizes   #
+ #               & de-duplicatesthe data, and creates a readable summary    #
+ #               in either html or csv format.                              #
+ #                                                                          #
+ #  Requirements:                                                           #
+ #                Python                                                    #
+ #                One or more Kismet .netxml log files                      #
+ #                                                                          #
+ #   Extended features:                                                     #
+ #       @NEW GPS,SignalInfo,HTML code on HTML creation (clean CSV)         #
+ #            -n argument, Modify HTML, Clean \n on CSV, CSV headers        #
+ #            -o default mode change                                        #
+ #                                                                          #
+ #  Website: http://klv.professionallyevil.com                              #
+ #  Author:  Nathan Sweaney - nathan@sweaney.com                            #
+ #  Date:   July 9, 2013                                                    #
+ ############################################################################
+
+Usage:
+  klv.py [-h] [-o {html,csv}] [-s {essid,security,bssid,manufacturer,clients,packets}] [-g {yes,no}] [-t {beacon,request,response}] LogFilePath
+
+         -h, --help show this help message and exit
+         -o {html,csv} Output format (default: both)
+      *  -s {essid,security,bssid,manufacturer,clients,packets} Sort output (default: essid) (unfinished)
+      *  -g {yes,no} Group by essid (default: no) (unfinished)
+      *  -t {beacon,request,response} Show network types (default: beacon only) (unfinished)
+LogFilePath A directory containing one or more Kismet .netxml log files, other files will be ignored
+	 -n Name for the processed files. Filename default: Kismet-Log-Summary'
+  *=unfinished
+
+ Example usage:
+          ./klv.py -h
+          ./klv.py /root/kismet-logs/
+          ./klv.py -t csv /root/kismet-logs/
+
 Todo:
 * add client data
   - To start, just summarize the number of clients for each network.
@@ -69,15 +85,19 @@ now = datetime.datetime.now()
 timestamp = now.strftime("%Y-%m-%d %H:%M:%S")
 
 # process command-line arguments
-parser = argparse.ArgumentParser(description='Kismet Log Viewer v3.01.beta creates a readable summary of Kismet .netxml log files.')
+parser = argparse.ArgumentParser(description='Kismet Log Viewer v3.1 creates a readable summary of Kismet .netxml log files.')
 parser.add_argument('log_file_path', metavar='LogFilePath',
                    help='A directory containing one or more Kismet .netxml log files. KLV will process all .netxml files in the directory but will ignore all other files.')
 parser.add_argument('-o', default="both", choices=['html', 'csv', 'both'],
                    help='Output format (default: html)')
-# *Unfinished* parser.add_argument('-s', default="essid", choices=['essid', 'security', 'bssid', 'manufacturer', 'clients', 'packets'], help='Sort output (default: essid) (***unfinished***)')
-# *Unfinished parser.add_argument('-g', default="no", choices=['yes', 'no'], help='Group by essid (default: no) (***unfinished***)')
-# *Unfinished parser.add_argument('-t', default="beacon", nargs=1, choices=['beacon', 'request', 'response'], help='Show network types (default: beacon only) (***unfinished***)')
-parser.add_argument('-n', default="Kismet-Log-Summary", help='Name for the processed files. Filename default: Kismet-Log-Summary')
+# *Unfinished* parser.add_argument('-s', default="essid", choices=['essid', 'security', 'bssid', 'manufacturer', 'clients', 'packets'],
+#                   help='Sort output (default: essid) (***unfinished***)')
+# *Unfinished* parser.add_argument('-g', default="no", choices=['yes', 'no'],
+#                   help='Group by essid (default: no) (***unfinished***)')
+# *Unfinished* parser.add_argument('-t', default="beacon", nargs=1, choices=['beacon', 'request', 'response'],
+#                   help='Show network types (default: beacon only) (***unfinished***)')
+parser.add_argument('-n', default="Kismet-Log-Summary",
+                   help='Name for the processed files. Filename default: Kismet-Log-Summary')
 args = parser.parse_args()
 output_format = args.o
 summaryFilename = args.n
@@ -105,6 +125,7 @@ def main():
             # ignoring probes right now
             if network_type <> 'probe':
                network_essid = ""
+               network_channel = ""
                network_encryption = ""
                network_bssid = ""
                network_manufacturer = ""
@@ -116,6 +137,9 @@ def main():
                network_gps_avg_lon = ""
                network_gps_avg_alt = ""
                network_oui = ""
+#Added by j0nk0
+               network_client = ""
+#/Added by j0nk0
                for network_detail in network:
    
                   if network_detail.tag == 'SSID':
@@ -123,6 +147,7 @@ def main():
                         if child_network.tag == 'essid':
                            if child_network.attrib.get("cloaked") == "true":
                               cloaked = "cloaked"
+#from v2                      cloaked = " &lt;cloaked&gt;"
                            else:
                               cloaked = ""
                            if child_network.text is None:
@@ -132,8 +157,10 @@ def main():
    
                         if child_network.tag == 'encryption':
                            network_encryption += child_network.text + '\n'
+#from v2                   network_encryption += child_network.text + "<br />"
    
                   if network_detail.tag == 'BSSID':
+#from 	          elif network_detail.tag == 'BSSID':
                      network_bssid = network_detail.text
                      network_oui = network_bssid[0:2] + "-" + network_bssid[3:5] + "-" + network_bssid[6:8]
                      oui_file.seek(0)
@@ -142,6 +169,20 @@ def main():
                            network_manufacturer = line[20:]
                            break
 
+#Added by j0nk0
+                  if network_detail.tag == 'wireless-client':
+                     for child_network in network_detail:
+                        if child_network.tag == 'client-mac':
+                           if child_network.text is None:
+                              network_client = child_network.text
+   
+                        if child_network.tag == 'client-mac':
+                           network_client += child_network.text + "<br />"
+#/Added by j0nk0
+  		  #Channel parsing             
+                  elif network_detail.tag == 'channel':
+                     network_channel = network_detail.text
+  
                   #Signal Info parsing
                   if network_detail.tag == 'snr-info':
                      for child_network in network_detail:
@@ -164,11 +205,12 @@ def main():
                         if child_network.tag == 'avg-alt':
                           network_gps_avg_alt += child_network.text
                
-               #OM NOM NOM
+               #bssid parsing
                if network_bssid not in bssid_list:
                   bssid_list.append(network_bssid)
-                  network_matrix.append([network_essid, network_encryption, network_bssid, network_manufacturer, network_min_signal_dbm, network_max_signal_dbm, network_min_signal_rssi, network_max_signal_rssi, network_gps_avg_lat, network_gps_avg_lon, network_gps_avg_alt])
-   
+#Edited by j0nk0
+                  network_matrix.append([network_essid, network_channel, network_encryption, network_bssid, network_manufacturer, network_client, network_min_signal_dbm, network_max_signal_dbm, network_min_signal_rssi, network_max_signal_rssi, network_gps_avg_lat, network_gps_avg_lon, network_gps_avg_alt])
+#/Edited by j0nk0   
    if output_format == 'both':
      create_html_file(network_matrix)
      create_csv_file(network_matrix)
@@ -206,9 +248,11 @@ def create_html_file(network_matrix):
    summary_file.write('      <tr bgcolor="#cecece">\n')
    summary_file.write('        <th><font size="2">ID</font></th>\n')
    summary_file.write('        <th align=left><font size="2">Name (ESSID)</font></th>\n')
+   summary_file.write('        <th><font size="2">Channel</font></th>\n')
    summary_file.write('        <th><font size="2">Security</font></th>\n')
    summary_file.write('        <th><font size="2">BSSID</font></th>\n')
    summary_file.write('        <th><font size="2">Manufacturer</font></th>\n')
+   summary_file.write('        <th><font size="2">Clients</font></th>\n')
    summary_file.write('        <th><font size="2">Min. DBM</font></th>\n')
    summary_file.write('        <th><font size="2">Max. DBM</font></th>\n')
    summary_file.write('        <th><font size="2">Min. RSSI</font></th>\n')
@@ -216,7 +260,6 @@ def create_html_file(network_matrix):
    summary_file.write('        <th><font size="2">Lat.</font></th>\n')
    summary_file.write('        <th><font size="2">Lon.</font></th>\n')
    summary_file.write('        <th><font size="2">Alt.</font></th>\n')
-#  summary_file.write('        <th><font size="2">&lt;Clients&gt;</font></th>\n')
 #  summary_file.write('        <th><font size="2">&lt;Packets&gt;</font></th>\n')
    summary_file.write('      </tr>\n')
 
@@ -251,7 +294,7 @@ def create_html_file(network_matrix):
 
    summary_file.write('    </table>\n')
    summary_file.write('<br />\n')
-   
+
    # print list of log files
    summary_file.write('    <table width="760" border="0" align="center" cellpadding="5" cellspacing="1" bgcolor="#efefef">\n')
    summary_file.write('      <tr bgcolor="#cecece">\n')
@@ -267,27 +310,26 @@ def create_html_file(network_matrix):
       else:
          summary_file.write('      <tr bgcolor="#FFFFFF">\n')
          row_toggle = 1
-   
+
       summary_file.write('        <td align="center"><font size="2">' + log_file + '</font></td>\n')
       summary_file.write('      </tr>\n')
-   
+      summary_file.write('      \n')
+      summary_file.write('      \n')
    summary_file.write('    </table>\n')
 
    # print footer
    summary_file.write('<br />\n')
-   summary_file.write('    <table width="760" border="0" align="center" cellpadding="5" cellspacing="1" bgcolor="#efefef">\n')
+   summary_file.write('    <table width="760" border="0" align="center" cellpadding="5" cellspacing="1" >\n')
    summary_file.write('      <tr>\n')
    summary_file.write('        <td></td>\n')
    summary_file.write('      </tr>\n')
    summary_file.write('      <tr bgcolor="#FFFFFF">\n')
-   summary_file.write('        <td align="center"><font size="2">Based on Kismet Log Viewer v2.01 - written by Nathan Sweaney</font></td>\n')
-   summary_file.write('        <td align="center"><font size="2">Developed by <a href="https://github.com/illegalPointer">Illegal Pointer</a></font></td>\n')
+   summary_file.write('        <td align="center"><font size="2">Based on Kismet Log Viewer v2.01 - written by <a href="mailto:nathan@secureideas.com">Nathan Sweaney</a></font></td>\n')
    summary_file.write('      </tr>\n')
    summary_file.write('      <tr>\n')
    summary_file.write('        <td></td>\n')
    summary_file.write('      </tr>\n')
    summary_file.write('    </table>\n')
-   
    summary_file.write('  </body>\n')
    summary_file.write('</html>\n')
 
@@ -295,5 +337,4 @@ def create_html_file(network_matrix):
 
 
 main()
-
 
