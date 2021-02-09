@@ -2,9 +2,9 @@
 #### Kismet Log Viewer v3.1.1 Tool (http://klv.professionallyevil.com/)
 Combines multiple Kismet log files in the .netxml format, summarizes the data, and outputs an easy-to-read html or csv file.
 
-Kismet Log Viewer v2 Was written in Python, with limited functionality.
-The original KLV was written in 2003 by Brian Foy of Mindflip.org, but w/o support for newer versions of .netxml format.
-Updated to use python3 in 2021 by Jeff Sutch of Collett Park Networks.
+Kismet Log Viewer v2 Was written in Python, with limited functionality.  
+The original KLV was written in 2003 by Brian Foy of Mindflip.org, but w/o support for newer versions of .netxml format.  
+Updated to use python3 in 2021 by Jeff Sutch of Collett Park Networks.  
 
 ```
  ############################################################################
