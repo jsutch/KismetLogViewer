@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 """
 Kismet Log Viewer v3.1 Tool (http://klv.professionallyevil.com/)
 Combines multiple Kismet log files in the .netxml format, summarizes the data, and outputs an easy-to-read html or csv file.
@@ -105,7 +105,7 @@ output_format = args.o
 summaryFilename = args.n
 
 # add the ending slash in case it was left off
-if args.log_file_path[-1:] <> "/":
+if args.log_file_path[-1:] != "/":
    args.log_file_path = args.log_file_path + "/"
 
 # remove empty files
@@ -114,11 +114,11 @@ files_in_dir = os.listdir(args.log_file_path)
 indir=args.log_file_path
 os.chdir(indir)
 
-print "\n\nChecking for empty files:\n"
+print("\n\nChecking for empty files:\n")
 for file_in_dir in files_in_dir:
      if os.stat(file_in_dir).st_size==0:
-        print "Deleting empty file:"
-        print file_in_dir
+        print("Deleting empty file:")
+        print(file_in_dir)
         os.remove(file_in_dir)
 
 def main():
@@ -127,7 +127,7 @@ def main():
 
    for file_in_dir in files_in_dir:
       if file_in_dir[-7:] == ".netxml":
-         print "Adding file: ", file_in_dir
+         print("Adding file: ", file_in_dir)
          log_file_list.append(file_in_dir)
          xml_tree = ET.parse(args.log_file_path + file_in_dir)
          xml_root = xml_tree.getroot()
@@ -138,7 +138,7 @@ def main():
             network_type = network.get('type')
 
             # ignoring probes right now
-            if network_type <> 'probe':
+            if network_type != 'probe':
                network_essid = ""
                network_channel = ""
                network_encryption = ""
@@ -395,7 +395,7 @@ def create_html_file(network_matrix):
 
    summary_file.close()
 
-   print "Done, html-output saved as " + summaryFilename + '.html'
-   print "Done, csv-output saved as " + summaryFilename + '.csv'
+   print("Done, html-output saved as " + summaryFilename + '.html')
+   print("Done, csv-output saved as " + summaryFilename + '.csv')
 main()
 
