@@ -37,14 +37,15 @@ klv.py [-h] [-o {html,csv}] [-s {essid,security,bssid,manufacturer,clients,packe
       *  -s {essid,security,bssid,manufacturer,clients,packets} Sort output (default: essid) (unfinished)
       *  -g {yes,no} Group by essid (default: no) (unfinished)
       *  -t {beacon,request,response} Show network types (default: beacon only) (unfinished)
-LogFilePath A directory containing one or more Kismet .netxml log files, other files will be ignored
+          <LogFilePath> A directory containing one or more Kismet .netxml log files, other files will be ignored  
          -n Name for the processed files. Filename default: Kismet-Log-Summary'
       *=unfinished
       
  Example usage:
-          ./klv.py -h                                                      
-          ./klv.py /root/kismet-logs/                                      
-          ./klv.py -t csv /root/kismet-logs/                               
+          ./klv <options> <path to kismet logs>
+          ./klv -h                                                      
+          ./klv /root/kismet-logs/                                      
+          ./klv -o csv /root/kismet-logs/                               
 ```
 #===#
 ```
